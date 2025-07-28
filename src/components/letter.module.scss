@@ -1,0 +1,87 @@
+// variables
+$background: #1d1e1e;
+$chars: "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","0","1","2","3","4","5","6","7","8","9";
+
+
+
+// Component styles
+.departureBoard {
+  display: inline-flex;
+}
+
+.letter {
+  background-color: #000;
+  border-right: 1px solid $background;
+  color: #000;
+  display: flex;
+  flex-direction: column;
+  height: 40px;
+  text-align: center;
+  width: 40px;
+
+  &::before,
+  &::after {
+    background-color: #000;
+    font-size: 40px;
+    height: 40px;
+    line-height: 40px;
+    overflow: hidden;
+    width: 100%;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+
+  &::before {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    height: 20px;
+    z-index: 20;
+  }
+
+  &::after {
+    margin-top: -50%;
+    z-index: 10;
+  }
+}
+
+.letterBlank::before,
+.letterBlank::after {
+  content: ' ';
+}
+
+// Letter content classes
+@each $char in $chars {
+  .letter-#{$char}::before {
+    content: "#{$char}";
+  }
+  .letter-#{$char}::after {
+    content: "#{$char}";
+  }
+}
+
+// Animation delay classes
+@for $i from 1 through 50 {
+  .animate-#{$i}::before,
+  .animate-#{$i}::after {
+    animation: flip 1s ease-in-out forwards;
+    animation-delay: #{($i / 4)}s;
+    transition-delay: #{($i / 4)}s;
+  }
+}
+
+@keyframes flip {
+  0% {
+    color: #000;
+    transform: rotateX(0deg);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: rotateX(360deg);
+    color: #fff;
+  }
+  100% {
+    color: #fff;
+    transform: rotateX(360deg);
+  }
+}
