@@ -1,6 +1,6 @@
 # GatewayBHD
 
-A live flight information display for Belfast City Airport (BHD), built with Next.js and fetching real-time arrivals and departures.
+A live flight information display flights based on your location, built with Next.js and fetching real-time arrivals and departures.
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
