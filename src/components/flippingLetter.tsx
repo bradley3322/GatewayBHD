@@ -1,8 +1,18 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './letterR.module.scss';
 
-const CHAR_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:(!/\''.split('');
+const BASE_CHAR_SET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-:(!/'";
+
+const buildCharSet = (text: string) => {
+    const chars = new Set<string>(BASE_CHAR_SET.split(''));
+    for (const char of text.toUpperCase()) {
+        if (char !== ' ') {
+            chars.add(char);
+        }
+    }
+    return Array.from(chars);
+};
 
 interface FlippingLetterProps {
     finalChar: string;
@@ -13,6 +23,8 @@ export const FlippingLetter = ({ finalChar, delay }: FlippingLetterProps) => {
     const [currentChar, setCurrentChar] = useState(' ');
     const [flippingClass, setFlippingClass] = useState('');
 
+    const CHAR_SET = useMemo(() => buildCharSet(finalChar), [finalChar]);
+
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
 
@@ -20,7 +32,7 @@ export const FlippingLetter = ({ finalChar, delay }: FlippingLetterProps) => {
             let currentIndex = 0;
 
             intervalId = setInterval(() => {
-                if (finalChar.toUpperCase() === " ") {
+                if (finalChar.toUpperCase() === ' ') {
                     setCurrentChar(' ');
                     clearInterval(intervalId);
                 } else {
@@ -44,7 +56,7 @@ export const FlippingLetter = ({ finalChar, delay }: FlippingLetterProps) => {
             clearInterval(intervalId);
             clearTimeout(delayTimeout);
         };
-    }, [finalChar, delay]);
+    }, [CHAR_SET, delay, finalChar]);
 
     return (
         <span className={`${styles.letter}`}>
