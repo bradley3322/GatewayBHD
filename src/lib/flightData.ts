@@ -39,32 +39,6 @@ export async function getFlightDataByLocation(lat: number, lon: number): Promise
     }
 }
 
-// export async function getFlightDataByCallSign(callsign: string): Promise<FlightRouteData | null> {
-//     const url = `${CALLSIGN_FLIGHT_API_URL}callsign/${callsign}`;
-//     console.log(`[SERVER] Fetching flight data for callsign: ${callsign} from ${url}`);
-
-//     try {
-
-//         const response = await fetch(url, {
-//             next: { revalidate: 3600 } // 1 hour
-//         });
-
-//         if (!response.ok) {
-//             const errorBody = await response.text();
-//             console.error(`[SERVER] Failed to fetch flight CallSign data: ${response.status} ${response.statusText}. Response: ${errorBody}`);
-//             throw new Error(`Failed to fetch flight CallSign data: ${response.statusText}`);
-//         }
-
-//         const flightRouteResponse: FlightRouteResponse = await response.json();
-//         const flight: FlightRouteData = flightRouteResponse.response.flightroute;
-//         return flight;
-
-//     } catch (error) {
-//         console.error("[SERVER] Error fetching or processing flight data by callsign:", error);
-//         return null;
-//     }
-// }
-
 export async function getFlightDataByRouteSet(planes: routeSetRequest): Promise<RouteResponse | null> {
     const url = `https://api.adsb.lol/api/0/routeset`;
     console.log(`[SERVER] Fetching route data for planes: ${JSON.stringify(planes)} from ${url}`);
