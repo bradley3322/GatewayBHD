@@ -1,5 +1,19 @@
 import { getFlightDataByLocation, getFlightDataByRouteSet } from "@/lib/flightData";
-import { routeSetRequest } from "@/types/flights";
+import { LocationAircraftData, routeSetRequest } from "@/types/flights";
+
+const CACHE_TTL_MS = 50 * 1000;
+const apiCache = new Map<string, { expiresAt: number; responseData: unknown }>();
+
+const cacheKeyForBody = (body: unknown) => JSON.stringify(body);
+
+const makeJsonResponse = (data: unknown, cacheStatus: string) =>
+    new Response(JSON.stringify(data), {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json',
+            'x-cache-status': cacheStatus,
+        },
+    });
 
 export const dynamic = 'force-dynamic';
 
@@ -17,12 +31,16 @@ export async function POST(request: Request): Promise<Response> {
             });
         }
 
+        const key = cacheKeyForBody({ type: 'location', lat, lon });
+        const cached = apiCache.get(key);
+        if (cached && cached.expiresAt > Date.now()) {
+            return makeJsonResponse(cached.responseData, 'HIT');
+        }
+
         try {
             const flights = await getFlightDataByLocation(lat, lon);
-            return new Response(JSON.stringify(flights), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' },
-            });
+            apiCache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, responseData: flights });
+            return makeJsonResponse(flights, 'MISS');
         } catch (error) {
             console.error("[API Route] Error in /api/flights location lookup:", error);
             return new Response(JSON.stringify({ error: "Failed to fetch flight data based on location" }), {
@@ -34,13 +52,16 @@ export async function POST(request: Request): Promise<Response> {
 
     if (Array.isArray(body?.planes)) {
         const routeRequest = body as routeSetRequest;
+        const key = cacheKeyForBody({ type: 'routeSet', ...routeRequest });
+        const cached = apiCache.get(key);
+        if (cached && cached.expiresAt > Date.now()) {
+            return makeJsonResponse(cached.responseData, 'HIT');
+        }
 
         try {
             const routes = await getFlightDataByRouteSet(routeRequest);
-            return new Response(JSON.stringify(routes), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' },
-            });
+            apiCache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, responseData: routes });
+            return makeJsonResponse(routes, 'MISS');
         } catch (error) {
             console.error("[API Route] Error in /api/flights route lookup:", error);
             return new Response(JSON.stringify({ error: "Failed to fetch route data for planes" }), {
