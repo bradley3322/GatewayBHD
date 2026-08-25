@@ -27,6 +27,15 @@ $background: #070707;
   }
 }
 
+@media (max-width: 480px) {
+  .letter {
+    width: 20px;
+    height: 24px;
+    font-size: 18px;
+    margin-right: 3px;
+  }
+}
+
 @keyframes flip {
   0% {
     transform: rotateX(0deg);

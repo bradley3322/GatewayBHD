@@ -28,7 +28,7 @@ export const BoardContainer = ({ flights }: { flights: FlightBoardData[] }) => {
             <div className="flex flex-col gap-3 sm:hidden">
                 {visibleFlights.map((flight, index) => (
                     <div key={index} className="rounded-lg border border-gray-200 p-3 overflow-hidden">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center gap-4 justify-between">
                             <BoardElement text={formatTime(flight?.estimated_off ?? '')} length={5} />
                             <BoardElement text={flight?.ident} length={7} />
                         </div>
@@ -36,10 +36,10 @@ export const BoardContainer = ({ flights }: { flights: FlightBoardData[] }) => {
                             <BoardElement text={flight?.operator ?? ''} length={3} />
                         </div>
                         <div className="mt-2 overflow-x-auto">
-                            <BoardElement text={type === 'DEPARTURE' ? flight?.destination?.name ?? '' : flight?.origin?.name ?? ''} length={15} />
+                            <BoardElement text={type === 'DEPARTURE' ? flight?.destination?.name ?? '' : flight?.origin?.name ?? ''} length={12} />
                         </div>
                         <div className="mt-2">
-                            <BoardElement text={getStatusText(flight)} length={13} />
+                            <BoardElement text={getStatusText(flight)} length={10} />
                         </div>
                     </div>
                 ))}
@@ -49,16 +49,16 @@ export const BoardContainer = ({ flights }: { flights: FlightBoardData[] }) => {
             <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3">
                 {visibleFlights.map((flight, index) => (
                     <div key={index} className="rounded-lg border border-gray-200 p-3 overflow-hidden">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center gap-4 justify-between">
                             <BoardElement text={formatTime(flight?.estimated_off ?? '')} length={5} />
                             <BoardElement text={flight?.ident} length={7} />
                         </div>
-                        <div className="mt-2 flex items-center justify-between">
+                        <div className="mt-2 flex flex-wrap items-center gap-4 justify-between">
                             <BoardElement text={flight?.operator ?? ''} length={3} />
-                            <BoardElement text={getStatusText(flight)} length={13} />
+                            <BoardElement text={getStatusText(flight)} length={10} />
                         </div>
                         <div className="mt-2 overflow-x-auto">
-                            <BoardElement text={type === 'DEPARTURE' ? flight?.destination?.name ?? '' : flight?.origin?.name ?? ''} length={20} />
+                            <BoardElement text={type === 'DEPARTURE' ? flight?.destination?.name ?? '' : flight?.origin?.name ?? ''} length={14} />
                         </div>
                     </div>
                 ))}
