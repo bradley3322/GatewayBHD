@@ -1,5 +1,5 @@
 import { getFlightDataByLocation, getFlightDataByRouteSet } from "@/lib/flightData";
-import { LocationAircraftData, routeSetRequest } from "@/types/flights";
+import { routeSetRequest } from "@/types/flights";
 
 const CACHE_TTL_MS = 50 * 1000;
 const apiCache = new Map<string, { expiresAt: number; responseData: unknown }>();
