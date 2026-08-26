@@ -10,7 +10,8 @@ export const BoardContainer = ({ flights }: { flights: FlightBoardData[] }) => {
 
     const visibleFlights = flights
         .filter(flight => flight?.type === 'Airline')
-        .filter(flight => flight?.kind === type);
+        .filter(flight => flight?.kind === type)
+        .slice(0, 15);
 
     // shared status text logic so mobile cards and desktop table stay in sync
     const getStatusText = (flight: FlightBoardData) => {
@@ -68,11 +69,11 @@ export const BoardContainer = ({ flights }: { flights: FlightBoardData[] }) => {
             <table className="hidden lg:table w-full text-left">
                 <thead>
                     <tr className='text-[#3a3a3a] font-light text-xl'>
-                        <th className='font-medium pr-3'>Time</th>
-                        <th className='font-medium pr-3'>Flight</th>
-                        <th className='font-medium pr-3'>Airline</th>
-                        <th className='font-medium pr-3'>{type === 'DEPARTURE' ? 'To' : 'From'}</th>
-                        <th className='font-medium pr-3'>Status</th>
+                        <th className='font-medium md:pr-3'>Time</th>
+                        <th className='font-medium md:pr-3'>Flight</th>
+                        <th className='font-medium md:pr-3'>Airline</th>
+                        <th className='font-medium md:pr-3'>{type === 'DEPARTURE' ? 'To' : 'From'}</th>
+                        <th className='font-medium md:pr-3'>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,11 +82,11 @@ export const BoardContainer = ({ flights }: { flights: FlightBoardData[] }) => {
                             key={index}
                             className=""
                         >
-                            <td className='pr-4'><BoardElement text={formatTime(flight?.estimated_off ?? '')} length={5} /></td>
-                            <td className='pr-4'><BoardElement text={flight?.ident} length={7} /></td>
-                            <td className='pr-4'><BoardElement text={flight?.operator ?? ''} length={3} /></td>
-                            <td className='pr-4'><BoardElement text={type === 'DEPARTURE' ? flight?.destination?.name ?? '' : flight?.origin?.name ?? ''} length={20} /></td>
-                            <td className='pr-4'><BoardElement text={getStatusText(flight)} length={13} /></td>
+                            <td className='md:pr-3'><BoardElement text={formatTime(flight?.estimated_off ?? '')} length={5} /></td>
+                            <td className='md:pr-3'><BoardElement text={flight?.ident} length={7} /></td>
+                            <td className='md:pr-3'><BoardElement text={flight?.operator ?? ''} length={3} /></td>
+                            <td className='md:pr-3'><BoardElement text={type === 'DEPARTURE' ? flight?.destination?.name ?? '' : flight?.origin?.name ?? ''} length={20} /></td>
+                            <td className='md:pr-3'><BoardElement text={getStatusText(flight)} length={13} /></td>
                         </tr>
                     ))}
                 </tbody>
