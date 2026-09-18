@@ -39,7 +39,7 @@ export async function getFlightDataByLocation(lat: number, lon: number): Promise
     }
 }
 
-export async function getFlightDataByRouteSet(planes: routeSetRequest): Promise<RouteResponse | null> {
+export async function getFlightDataByRouteSet(planes: routeSetRequest): Promise<RouteResponse> {
     const url = `https://api.adsb.lol/api/0/routeset`;
     console.log(`[SERVER] Fetching route data for planes: ${JSON.stringify(planes)} from ${url}`);
 
@@ -69,7 +69,7 @@ export async function getFlightDataByRouteSet(planes: routeSetRequest): Promise<
         return flightRouteResponse;
     } catch (error) {
         console.error("[SERVER] Error fetching or processing route data:", error);
-        return null;
+        return [];
     }
 }
 

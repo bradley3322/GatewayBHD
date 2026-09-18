@@ -34,7 +34,7 @@ export default function Home() {
 
     const locationBasedFlights: LocationAircraftData[] = await res.json();
     console.log("[CLIENT] POST /api/flights location result:", locationBasedFlights);
-    return locationBasedFlights;
+    return Array.isArray(locationBasedFlights) ? locationBasedFlights : [];
   }
 
   const callRoutes = async (missingCallsigns: routeSetRequestPlane[]): Promise<RouteResponseItem[]> => {
@@ -53,7 +53,7 @@ export default function Home() {
 
     const newRoutes: RouteResponseItem[] = await res.json();
     console.log("[CLIENT] POST /api/flights routes result:", newRoutes);
-    return newRoutes;
+    return Array.isArray(newRoutes) ? newRoutes : [];
   }
 
   const requestGeolocation = () => {
