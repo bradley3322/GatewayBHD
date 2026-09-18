@@ -133,6 +133,7 @@ export default function Home() {
         flight => {
           if (!flight.flight) return false;
           const callsign = flight.flight.trim();
+          if (!callsign) return false;
           return !knownRoutesRef.current[callsign] && !pendingCallsigns.current.has(callsign);
         }
       );
@@ -142,6 +143,7 @@ export default function Home() {
         missingCallsigns.forEach(flight => {
           if (!flight.flight) return;
           const callsign = flight.flight.trim();
+          if (!callsign) return;
           pendingCallsigns.current.add(callsign);
           routeSetRequestPlaneList.push({
             callsign,
