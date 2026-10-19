@@ -40,7 +40,7 @@ export async function getFlightDataByLocation(lat: number, lon: number): Promise
 }
 
 export async function getFlightDataByRouteSet(planes: routeSetRequest): Promise<RouteResponse> {
-    const url = `https://api.adsb.lol/api/0/routeset`;
+    const url = `https://adsb.im/api/0/routeset`;
     console.log(`[SERVER] Fetching route data for planes: ${JSON.stringify(planes)} from ${url}`);
 
     try {
@@ -49,8 +49,8 @@ export async function getFlightDataByRouteSet(planes: routeSetRequest): Promise<
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "Origin": "https://api.adsb.lol",
-                "Referer": "https://api.adsb.lol/docs",
+                "Origin": "https://adsb.im",
+                "Referer": "https://adsb.im/docs",
                 "User-Agent": "Flipboard Plane Tracker (personal) (https://github.com/bradley3322)"
             },
             body: JSON.stringify(planes),
