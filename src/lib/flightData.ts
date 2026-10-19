@@ -12,7 +12,7 @@ import {
 } from "@/types/flights";
 
 export async function getFlightDataByLocation(lat: number, lon: number): Promise<LocationAircraftData[]> {
-    const url = `${FLIGHT_API_URL}/point/${lat}/${lon}/100`;
+    const url = `${FLIGHT_API_URL}/point/${lat}/${lon}/330`;
     console.log(`[SERVER] Fetching flight data for location: lat=${lat}, lon=${lon} from ${url}`);
 
     try {
