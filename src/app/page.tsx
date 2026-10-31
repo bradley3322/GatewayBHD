@@ -8,6 +8,12 @@ import { calculateFlightStatus, estimateArrivalTime, classifyRouteByNearbyAirpor
 
 const MAX_ATTEMPTS = 3;
 
+const isUsableRoute = (r: RouteResponseItem | null): r is RouteResponseItem =>
+  !!r?.callsign &&
+  r._airports?.length >= 2 &&
+  !!r.airline_code &&
+  r.airline_code !== "unknown";
+
 export default function Home() {
   const [knownRoutes, setKnownRoutes] = useState<Record<string, RouteResponseItem>>({});
   const knownRoutesRef = useRef<Record<string, RouteResponseItem>>(knownRoutes);
@@ -146,7 +152,7 @@ export default function Home() {
         let resolved: RouteResponseItem[] = [];
         try {
           const newRoutes = await callRoutes(callsigns.map(callsign => ({ callsign, lat: 0, lng: 0 })));
-          resolved = (newRoutes ?? []).filter((r): r is RouteResponseItem => !!r?.callsign);
+          resolved = (newRoutes ?? []).filter(isUsableRoute);
           setKnownRoutes(prev => ({
             ...prev,
             ...Object.fromEntries(resolved.map(r => [r.callsign, r]))
@@ -171,31 +177,32 @@ export default function Home() {
   }, [userPosition]);
 
   const displayFlights = useMemo(() => {
-    return activeFlights.map((aircraft) => {
+    return activeFlights.flatMap((aircraft) => {
       const callsign = aircraft.flight?.trim() ?? "";
       const route: RouteResponseItem | null = knownRoutes[callsign] ?? null;
+      if (!route) return [];
       const status = calculateFlightStatus(aircraft, route);
       const estimatedOff = estimateArrivalTime(aircraft, route);
       let kind = "OVERHEAD"; // Default kind
       let type = "UNKNOWN"; // Default type
-      if (route && userPosition) {
+      if (userPosition) {
         kind = classifyRouteByNearbyAirport(route, userPosition);
         type = "Airline";
       }
 
-      return {
+      return [{
         callsign,
         ident: callsign,
-        operator: route?.airline_code ?? "",
-        destination: { name: route?._airports[1]?.name ?? "" },
-        origin: { name: route?._airports[0]?.name ?? "" },
+        operator: route.airline_code ?? "",
+        destination: { name: route._airports[1]?.name ?? "" },
+        origin: { name: route._airports[0]?.name ?? "" },
         status,
         estimated_off: estimatedOff,
         type: type,
         kind: kind,
         routeInformation: route,
         aircraftLocationData: aircraft,
-      };
+      }];
     });
   }, [activeFlights, knownRoutes, userPosition]);
 
@@ -223,7 +230,7 @@ export default function Home() {
     );
   }
 
-  if (!activeFlights || activeFlights.length === 0) {
+  if (displayFlights.length === 0) {
     return (
       <div className="font-sans">
         <main className="flex items-center justify-center min-h-screen">
