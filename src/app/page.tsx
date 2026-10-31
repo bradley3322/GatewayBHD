@@ -6,11 +6,13 @@ import { LocationAircraftData, RouteResponseItem, routeSetRequestPlane } from "@
 import { calculateFlightStatus, estimateArrivalTime, classifyRouteByNearbyAirport } from "@/utils/utils";
 
 
+const MAX_ATTEMPTS = 3;
+
 export default function Home() {
   const [knownRoutes, setKnownRoutes] = useState<Record<string, RouteResponseItem>>({});
   const knownRoutesRef = useRef<Record<string, RouteResponseItem>>(knownRoutes);
   const [activeFlights, setActiveFlights] = useState<LocationAircraftData[]>([])
-  const pendingCallsigns = useRef(new Set<string>())
+  const routeAttempts = useRef(new Map<string, number>())
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [geoStatus, setGeoStatus] = useState<string>('Default Belfast location is in use.');
@@ -47,8 +49,7 @@ export default function Home() {
     });
 
     if (!res.ok) {
-      console.error("[CLIENT] POST /api/flights routes failed:", res.status, res.statusText);
-      return [];
+      throw new Error(`POST /api/flights routes failed: ${res.status} ${res.statusText}`);
     }
 
     const newRoutes: RouteResponseItem[] = await res.json();
@@ -129,33 +130,35 @@ export default function Home() {
       const activeFlightsResponse = await callFlights(userPosition.lat, userPosition.lon);
       setActiveFlights(activeFlightsResponse);
 
-      const missingCallsigns = activeFlightsResponse.filter(
-        flight => {
-          if (!flight.flight) return false;
-          const callsign = flight.flight.trim();
-          return !knownRoutesRef.current[callsign] && !pendingCallsigns.current.has(callsign);
-        }
+      const inRange = new Set(activeFlightsResponse.map(f => f.flight?.trim()));
+      routeAttempts.current.forEach((_, callsign) => {
+        if (!inRange.has(callsign)) routeAttempts.current.delete(callsign);
+      });
+
+      const callsigns = Array.from(inRange).filter((callsign): callsign is string =>
+        !!callsign && !knownRoutesRef.current[callsign] && (routeAttempts.current.get(callsign) ?? 0) < MAX_ATTEMPTS
       );
 
-      if (missingCallsigns.length > 0) {
-        const routeSetRequestPlaneList: routeSetRequestPlane[] = [];
-        missingCallsigns.forEach(flight => {
-          if (!flight.flight) return;
-          const callsign = flight.flight.trim();
-          pendingCallsigns.current.add(callsign);
-          routeSetRequestPlaneList.push({
-            callsign,
-            lat: 0,
-            lng: 0,
-          });
-        });
+      if (callsigns.length > 0) {
+        callsigns.forEach(c => routeAttempts.current.set(c, (routeAttempts.current.get(c) ?? 0) + 1));
+        console.log(`[CLIENT] Fetching routes for missing callsigns: ${callsigns.join(", ")}`);
 
-        console.log(`[CLIENT] Fetching routes for missing callsigns: ${routeSetRequestPlaneList.map(p => p.callsign).join(", ")}`);
-        const newRoutes = await callRoutes(routeSetRequestPlaneList);
-        setKnownRoutes(prev => ({
-          ...prev,
-          ...Object.fromEntries(newRoutes.map(r => [r.callsign, r]))
-        }));
+        let resolved: RouteResponseItem[] = [];
+        try {
+          const newRoutes = await callRoutes(callsigns.map(callsign => ({ callsign, lat: 0, lng: 0 })));
+          resolved = (newRoutes ?? []).filter((r): r is RouteResponseItem => !!r?.callsign);
+          setKnownRoutes(prev => ({
+            ...prev,
+            ...Object.fromEntries(resolved.map(r => [r.callsign, r]))
+          }));
+        } catch (err) {
+          console.error("[CLIENT] Route lookup failed:", err);
+        }
+
+        const resolvedSet = new Set(resolved.map(r => r.callsign));
+        callsigns
+          .filter(c => !resolvedSet.has(c) && routeAttempts.current.get(c) === MAX_ATTEMPTS)
+          .forEach(c => console.warn(`[CLIENT] Giving up on route for ${c} after ${MAX_ATTEMPTS} attempts`));
       }
 
       setLoading(false);
